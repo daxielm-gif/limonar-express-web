@@ -17,19 +17,19 @@ async function cargarProductosDesdeExcel() {
             const col = fila.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
             if(col.length < 6) return null;
             return {
-                id: col[0]?.replace(/"/g, '').trim(),
-                name: col[1]?.replace(/"/g, '').trim(),
-                category: col[2]?.replace(/"/g, '').trim(),
-                location: col[3]?.replace(/"/g, '').trim(),
-                priceUSD: parseFloat(col[4]?.replace(/"/g, '').trim()) || 0,
-                priceMN: parseFloat(col[5]?.replace(/"/g, '').trim()) || 0,
-                stock: parseInt(col[6]?.replace(/"/g, '').trim()) || 0,
-                image: col[7]?.replace(/"/g, '').trim() || 'https://via.placeholder.com/150',
-                descripcion: col[8]?.replace(/"/g, '').trim() || "Sin descripción disponible.",
-                garantia: col[9]?.replace(/"/g, '').trim() || "Consulte con el vendedor.",
-                pagos: col[10]?.replace(/"/g, '').trim() || "Efectivo, Transferencia.",
-                tipoEntrega: col[11]?.replace(/"/g, '').trim() || "Domicilio", 
-    mapa: col[12]?.replace(/"/g, '').trim() || "" 
+    id: col[0]?.trim(),
+    name: col[1]?.trim(),
+    category: col[2]?.trim(),
+    location: col[3]?.trim(),
+    priceUSD: parseFloat(col[4]) || 0,
+    priceMN: parseFloat(col[5]) || 0,
+    stock: col[6]?.trim(),
+    image: col[7]?.trim(),
+    descripcion: col[8]?.trim(),
+    garantia: col[9]?.trim(),
+    pagos: col[10]?.trim(),
+    tipoEntrega: col[11]?.trim(), // Esta es la columna L (Entrega: Recogida/Domicilio)
+    mapa: col[12]?.trim()         // Esta es la columna M (Link de Google Maps)
 };
         }).filter(p => p !== null);
         
@@ -306,3 +306,4 @@ window.onpageshow = function(event) {
         actualizarBarraFlotante();
     }
 };
+
