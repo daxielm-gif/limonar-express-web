@@ -7,91 +7,76 @@
     <link rel="stylesheet" href="style.css">
     <style>
         .detalle-container { max-width: 800px; margin: 20px auto; padding: 20px; background: white; border-radius: 15px; }
-        .img-grande { width: 100%; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .img-grande { width: 100%; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-height: 400px; object-fit: contain; background: #eee; }
         .info-tecnica { background: #f8f9fa; padding: 15px; border-radius: 10px; margin: 15px 0; border-left: 5px solid #007bff; }
-        .metodos-pago { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-        .badge-pago { background: #e3f2fd; color: #007bff; padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; font-weight: bold; }
         body.dark-mode .detalle-container { background: #1e1e1e; }
         body.dark-mode .info-tecnica { background: #2d2d2d; color: #eee; }
     </style>
 </head>
 <body>
     <header>
-        <h1>Limonar Express 🇨🇺</h1>
-        <nav><a href="index.html">⬅️ Volver a la Tienda</a></nav>
+        <nav><a href="index.html" style="text-decoration: none; color: #007bff; font-weight: bold;">⬅️ Volver a la Tienda</a></nav>
     </header>
 
-    <main class="detalle-container" id="contenido-detalle">
-        </main>
+    <main class="detalle-container">
+        <div id="contenido-detalle">
+            <p style="text-align:center;">Cargando detalles del producto...</p>
+        </div>
+    </main>
 
     <script src="script.js"></script>
     <script>
         window.onload = () => {
+            // Aplicar modo oscuro si está activo
             if (localStorage.getItem('tema') === 'oscuro') document.body.classList.add('dark-mode');
-            renderizarDetalle();
+            
+            // Obtener el producto guardado en la memoria
+            const p = JSON.parse(localStorage.getItem('producto_seleccionado'));
+            
+            if (!p) {
+                document.getElementById('contenido-detalle').innerHTML = "<h2>Producto no encontrado</h2>";
+                return;
+            }
+
+            // Inyectar la información en el HTML
+            const container = document.getElementById('contenido-detalle');
+            container.innerHTML = `
+                <img src="${p.image}" class="img-grande" alt="${p.name}">
+                <h1>${p.name}</h1>
+                <h2 style="color: #2ecc71;">$${p.priceUSD} USD / ${p.priceMN.toLocaleString()} MN</h2>
+                
+                <div class="info-tecnica">
+                    <p><strong>📍 Ubicación:</strong> ${p.location}</p>
+                    <p><strong>📦 Categoría:</strong> ${p.category}</p>
+                    <p><strong>📝 Descripción:</strong> ${p.descripcion || 'Sin descripción disponible.'}</p>
+                    <p><strong>🛡️ Garantía:</strong> ${p.garantia || 'Consulte con el vendedor.'}</p>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <button onclick='agregarAlCarritoDetalle()' style="background:#007bff; padding: 15px; width: 100%; font-size: 1.1rem; margin-bottom: 10px; color:white; border:none; border-radius:10px; cursor:pointer;">🛒 Añadir al Carrito</button>
+                    <button onclick="preguntarWhatsApp('${p.name}')" style="background:#25D366; padding: 15px; width: 100%; font-size: 1.1rem; color:white; border:none; border-radius:10px; cursor:pointer;">💬 Consultar Disponibilidad</button>
+                </div>
+            `;
         };
-
-        function renderizarDetalle() {
-    const p = JSON.parse(localStorage.getItem('producto_seleccionado'));
-    const container = document.getElementById('contenido-detalle');
-    if (!p) { container.innerHTML = "Producto no encontrado."; return; }
-    // Lógica para mostrar la entrega
-let entregaTexto = p.tipoEntrega === "Recogida" 
-    ? `🚶 <b>Recogida Local:</b> El cliente debe buscar el producto.` 
-    : `🚚 <b>Entrega:</b> Domicilio disponible en ${p.location}.`;
-
-if (p.mapa && p.tipoEntrega === "Recogida") {
-    entregaTexto += `<br><a href="${p.mapa}" target="_blank" style="color:#007bff;">📍 Ver ubicación exacta</a>`;
-}
-
-// Inyectar en el HTML
-container.innerHTML = `
-    <div class="info-tecnica">
-        <p>${entregaTexto}</p>
-    </div>
-`;
-
-    container.innerHTML = `
-        <img src="${p.image}" class="img-grande" onerror="this.src='https://via.placeholder.com/400'">
-        <h2>${p.name}</h2>
-        <p style="color: #2ecc71; font-size: 1.5rem; font-weight: bold;">$${p.priceUSD} USD / ${p.priceMN.toLocaleString()} MN</p>
-        
-        <div class="info-tecnica">
-            <h3>📝 Descripción</h3>
-            <p>${p.descripcion}</p>
-        </div>
-
-        <div class="info-tecnica" style="border-left-color: #f1c40f;">
-        <h3>📋 Detalles de Venta</h3>
-        <p><b>📍 Municipio:</b> ${p.location}</p>
-        <p><b>✅ Garantía:</b> ${p.garantia}</p>
-        ${logisticaHTML}
-    </div>
-
-        <h3>💳 Métodos de Pago Aceptados</h3>
-        <p style="font-size: 0.9rem; color: #666;">${p.pagos}</p>
-
-        <div style="margin-top: 30px;">
-            <button onclick='agregarAlCarritoDetalle()' style="background:#007bff; padding: 15px; width: 100%; font-size: 1.1rem; margin-bottom: 10px; color:white; border:none; border-radius:10px;">🛒 Añadir al Carrito</button>
-            <button onclick="preguntarWhatsApp('${p.name}')" style="background:#25D366; padding: 15px; width: 100%; font-size: 1.1rem; color:white; border:none; border-radius:10px;">💬 Contactar por WhatsApp</button>
-        </div>
-    `;
-}
 
         function agregarAlCarritoDetalle() {
             const p = JSON.parse(localStorage.getItem('producto_seleccionado'));
-            // Llamamos a la función que ya tienes en script.js
             let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
             const itemExistente = carrito.find(item => item.id === p.id);
-            if (itemExistente) { itemExistente.cantidad += 1; } 
-            else { carrito.push({ ...p, cantidad: 1 }); }
+            
+            if (itemExistente) { 
+                itemExistente.cantidad += 1; 
+            } else { 
+                carrito.push({ ...p, cantidad: 1 }); 
+            }
+            
             localStorage.setItem('carrito', JSON.stringify(carrito));
             alert("¡Añadido al carrito!");
         }
 
         function preguntarWhatsApp(nombre) {
-            const mensaje = `Hola! Me interesa el equipo: ${nombre}. ¿Sigue disponible?`;
-            window.open(`https://wa.me/5358956989?text=${mensaje}`, '_blank');
+            const msj = `Hola! Me interesa el producto: *${nombre}*. ¿Está disponible y hacen envíos hoy?`;
+            window.open(`https://wa.me/5358956989?text=${encodeURIComponent(msj)}`, '_blank');
         }
     </script>
 </body>
