@@ -150,3 +150,27 @@ body.dark-mode p, body.dark-mode h2, body.dark-mode h3, body.dark-mode td { colo
 #btn-cargar-mas {
     margin-bottom: 70px; /* Le da espacio para que la barra no lo tape */
 }
+/* --- BUSCA ESTA PARTE EN TU STYLE.CSS --- */
+.hero-content {
+    max-width: 800px;
+    margin: 0 auto;       /* Centra el bloque */
+    text-align: center;   /* Centra el texto */
+    padding: 30px 15px;
+}
+
+.hero-badges {
+    display: flex;
+    gap: 10px;
+    justify-content: center; /* Centra los badges */
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+
+.hero-badges span {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
