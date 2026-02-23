@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limonar Express</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <h1>Limonar Express 🇨🇺</h1>
+    <nav style="margin-top: 10px;">
+        <a href="index.html" style="margin-right: 15px; text-decoration: none; color: #007bff; font-weight: bold;">Tienda</a>
+        <a href="ayuda.html" style="text-decoration: none; color: #666;">¿Cómo comprar?</a>
+    </nav>
+    <div class="theme-switch" onclick="toggleTheme()">
+    <span id="theme-icon">🌙</span>
+</div>
+</header>
+
+
+<main>
+    <section class="hero-banner">
+    <div class="hero-content">
+        <h2>Entregas Rápidas en Limonar y Matanzas 🚀</h2>
+        <p>Tu familia recibe en menos de 24 horas. Pagos seguros desde USA.</p>
+        <div class="hero-badges">
+            <span>✅ Zelle</span>
+            <span>✅ CashApp</span>
+            <span>✅ Entrega a Domicilio</span>
+        </div>
+    </div>
+</section>
+    <section class="calculator-card" style="background: #e3f2fd; border: 2px dashed #007bff; text-align: center;">
+    <h2>🚢 ¿Quieres algo de Amazon o EBAY?</h2>
+    <p>Traemos televisores, plantas, gomas de carro y más.</p>
+    <a href="usa.html" class="btn-filter" style="display: inline-block; background: #007bff; color: white; padding: 15px 30px; text-decoration: none; border-radius: 10px; font-weight: bold;">
+        VER CATÁLOGO USA
+    </a>
+</section>
+
+    <section class="local-market">
+    <div style="text-align: center; margin-bottom: 15px; padding: 10px; border-radius: 12px; border: 1px solid #ddd;">
+        <h2 style="margin: 0; font-size: 1.2rem;">🛍️ Mercado en Cuba</h2>
+        <p style="margin: 5px 0 0 0; font-size: 0.75rem; color: #666;">
+            🚚 <b>Domicilio GRATIS</b> > $15 USD
+        </p>
+    </div>
+
+    <div class="search-container" style="margin-bottom: 10px;">
+        <input type="text" id="search-input" placeholder="🔍 Buscar..." onkeyup="filtrarProductos()" style="padding: 8px;">
+    </div>   
+
+    <div class="filter-group" style="margin-bottom: 15px;">
+        <div class="filter-container">
+    <button onclick="filtrarCategoria('Todos')" class="btn-filter-sm">Todo</button>
+    <button onclick="filtrarCategoria('Comida')" class="btn-filter-sm">🥩 Comida</button>
+    <button onclick="filtrarCategoria('Aseo')" class="btn-filter-sm">🧼 Aseo</button>
+    <button onclick="filtrarCategoria('Otros')" class="btn-filter-sm">📦 Otros</button>
+    <button onclick="filtrarPorZona('Limonar')" class="btn-filter-sm">📍 Limonar</button>
+    <button onclick="filtrarPorZona('Matanzas')" class="btn-filter-sm">📍 Matanzas</button>
+</div>
+    </div>
+
+    <div id="tienda-productos" class="product-grid"></div>
+
+    <div style="text-align: center; margin-top: 15px;">
+        <button id="btn-cargar-mas" onclick="cargarMasProductos()" class="btn-filter-sm" style="background: #6c757d; color: white; display: none; padding: 10px 20px;">Ver más productos</button>
+    </div>
+</section>
+</main>
+<a href="https://wa.me/5358956989?text=Hola!%20Tengo%20una%20duda%20sobre%20un%20envío" 
+   class="whatsapp-float" 
+   target="_blank">
+   <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
+</a>
+
+<script src="script.js"></script>
+</body>
+</html>
