@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Carrito - Limonar Express</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="cart-page">
+    <header>
+        <h1>🛒 Mi Carrito</h1>
+        <nav><a href="index.html" style="font-weight:bold; color:#007bff;">⬅️ Volver a la Tienda</a></nav>
+    </header>
+
+    <main class="local-market">
+        <div id="lista-carrito-detallada">
+            </div>
+        
+        <div id="resumen-pago" style="margin-top: 20px; padding: 15px; border-top: 2px solid #ddd;">
+            </div>
+    </main>
+
+    <script src="script.js"></script>
+    <script>
+        // Al cargar esta página, mostramos el carrito detallado
+        window.onload = () => {
+            if (localStorage.getItem('tema') === 'oscuro') document.body.classList.add('dark-mode');
+            renderizarCarritoIndependiente();
+        };
+    </script>
+</body>
+</html>
