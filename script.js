@@ -172,20 +172,17 @@ function filtrarProductos() {
 
 function enviarPedidoWhatsApp() {
     if (carrito.length === 0) return;
-    let mensaje = "👋 *¡Hola! Quiero realizar este pedido:*%0A%0A";
-    let tUSD = 0, tMN = 0;
+    let mensaje = "👋 *¡Hola! Me interesa este pedido:*%0A%0A";
+    let tUSD = 0;
 
     carrito.forEach(p => {
         mensaje += `• ${p.name} (x${p.cantidad})%0A`;
         tUSD += (p.priceUSD * p.cantidad);
-        tMN += (p.priceMN * p.cantidad);
     });
 
-    mensaje += `%0A💵 *TOTAL A PAGAR:*%0A`;
-    if(tUSD > 0) mensaje += `USD: *$${tUSD.toFixed(2)}*%0A`;
-    if(tMN > 0) mensaje += `MN: *${tMN.toLocaleString()}*%0A`;
+    mensaje += `%0A💰 *Subtotal mercadería:* $${tUSD.toFixed(2)} USD`;
+    mensaje += `%0A%0A❓ *Consulta:* ¿Este vendedor tiene domicilio disponible hoy? ¿Cuál sería el costo adicional?`;
     
-    mensaje += `%0A📍 *Entrega:* ${carrito[0].location}%0A📌 *Gracias!*`;
     window.open(`https://wa.me/5358956989?text=${mensaje}`, '_blank');
 }
 
