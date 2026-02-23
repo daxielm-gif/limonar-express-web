@@ -40,23 +40,20 @@
 
             // Inyectar la información en el HTML
             const container = document.getElementById('contenido-detalle');
-            container.innerHTML = `
-                <img src="${p.image}" class="img-grande" alt="${p.name}">
-                <h1>${p.name}</h1>
-                <h2 style="color: #2ecc71;">$${p.priceUSD} USD / ${p.priceMN.toLocaleString()} MN</h2>
-                
-                <div class="info-tecnica">
-                    <p><strong>📍 Ubicación:</strong> ${p.location}</p>
-                    <p><strong>📦 Categoría:</strong> ${p.category}</p>
-                    <p><strong>📝 Descripción:</strong> ${p.descripcion || 'Sin descripción disponible.'}</p>
-                    <p><strong>🛡️ Garantía:</strong> ${p.garantia || 'Consulte con el vendedor.'}</p>
-                </div>
-
-                <div style="margin-top: 30px;">
-                    <button onclick='agregarAlCarritoDetalle()' style="background:#007bff; padding: 15px; width: 100%; font-size: 1.1rem; margin-bottom: 10px; color:white; border:none; border-radius:10px; cursor:pointer;">🛒 Añadir al Carrito</button>
-                    <button onclick="preguntarWhatsApp('${p.name}')" style="background:#25D366; padding: 15px; width: 100%; font-size: 1.1rem; color:white; border:none; border-radius:10px; cursor:pointer;">💬 Consultar Disponibilidad</button>
-                </div>
-            `;
+            // Busca esta parte dentro de detalle.html y asegúrate de que incluya esto:
+container.innerHTML = `
+    <img src="${p.image}" class="img-grande">
+    <h1>${p.name}</h1>
+    <h2 style="color: #2ecc71;">$${p.priceUSD} USD</h2>
+    
+    <div class="info-tecnica">
+        <p><strong>📍 Zona:</strong> ${p.location}</p>
+        <p><strong>🚚 Entrega:</strong> ${p.tipoEntrega}</p> 
+        ${p.mapa ? `<p><strong>🗺️ Ubicación:</strong> <a href="${p.mapa}" target="_blank" style="color:#007bff;">Ver en Google Maps</a></p>` : ''}
+        <p><strong>📝 Nota:</strong> ${p.descripcion}</p>
+    </div>
+    ...
+`;
         };
 
         function agregarAlCarritoDetalle() {
@@ -81,3 +78,4 @@
     </script>
 </body>
 </html>
+
