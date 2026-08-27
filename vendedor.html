@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Panel | Limonar Express</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .panel-header {
+            background: var(--verde);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .panel-header h1 { font-size: 1.3rem; margin: 0; }
+        .panel-header .info { font-size: 0.85rem; opacity: 0.9; }
+        .btn-logout {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.4);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+        .admin-section {
+            border: 2px solid var(--dorado);
+            background: var(--dorado-claro);
+        }
+        .admin-section h2 { color: #8a6d0b; }
+        .vendedor-card {
+            background: white;
+            border: 1px solid var(--borde);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 10px;
+        }
+        .stats-box {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: var(--verde-claro);
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+        }
+        .stat-card .number {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--verde);
+        }
+        .stat-card .label {
+            font-size: 0.8rem;
+            color: var(--texto-suave);
+        }
+        .btn-edit {
+            background: #1560bd;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-right: 6px;
+        }
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-inner">
+            <a href="index.html" class="logo">Limonar<span>Express</span></a>
+            <nav class="header-nav">
+                <a href="index.html" class="nav-link">Ver Tienda</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <div class="panel-header">
+            <div>
+                <h1 id="titulo-vendedor">Mi Panel</h1>
+                <div class="info" id="info-vendedor"></div>
+            </div>
+            <button class="btn-logout" onclick="cerrarSesion()">Cerrar sesión</button>
+        </div>
+
+        <div class="stats-box" id="stats-box">
+            <div class="stat-card">
+                <div class="number" id="stat-total">0</div>
+                <div class="label">Productos</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="stat-stock">0</div>
+                <div class="label">En stock</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="stat-agotados">0</div>
+                <div class="label">Agotados</div>
+            </div>
+        </div>
+
+        <!-- Solo Admin -->
+        <section id="seccion-admin" class="calculator-card admin-section" style="display:none;">
+            <h2>👑 Gestionar Vendedores</h2>
+            <form id="form-vendedor" style="margin-bottom:24px;">
+                <div class="input-group">
+                    <label>Nombre completo</label>
+                    <input type="text" id="v-nombre" required placeholder="Ej: Juan Pérez">
+                </div>
+                <div class="input-group">
+                    <label>Teléfono</label>
+                    <input type="text" id="v-telefono" placeholder="5358xxxxxx">
+                </div>
+                <div class="input-group">
+                    <label>Zona</label>
+                    <select id="v-zona">
+                        <option value="Limonar">Limonar</option>
+                        <option value="Matanzas">Matanzas</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Usuario (para login)</label>
+                    <input type="text" id="v-usuario" required placeholder="Ej: juanperez">
+                </div>
+                <div class="input-group">
+                    <label>Contraseña</label>
+                    <input type="text" id="v-password" required placeholder="Mínimo 6 caracteres">
+                </div>
+                <div class="input-group">
+                    <label>Comisión (%)</label>
+                    <input type="number" id="v-comision" value="10" min="0" max="50" step="0.5">
+                </div>
+                <button type="submit" class="btn-primary">Crear Vendedor</button>
+            </form>
+            <h3 style="margin-bottom:12px;">Vendedores registrados</h3>
+            <div id="lista-vendedores"></div>
+        </section>
+
+        <!-- Formulario Producto -->
+        <section class="calculator-card">
+            <h2 id="form-titulo">Añadir Nuevo Producto</h2>
+            <form id="product-form">
+                <input type="hidden" id="edit-id" value="">
+                <div class="input-group">
+                    <label>Nombre del Producto</label>
+                    <input type="text" id="name" required placeholder="Ej: Aceite de Girasol">
+                </div>
+                <div class="input-group">
+                    <label>Categoría</label>
+                    <select id="category">
+                        <option value="Comida">Comida</option>
+                        <option value="Aseo">Aseo</option>
+                        <option value="Otros">Otros</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Zona</label>
+                    <select id="location">
+                        <option value="Limonar">Limonar</option>
+                        <option value="Matanzas">Matanzas</option>
+                    </select>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                    <div class="input-group">
+                        <label>Precio USD</label>
+                        <input type="number" id="priceUSD" step="0.01" value="0">
+                    </div>
+                    <div class="input-group">
+                        <label>Precio MN</label>
+                        <input type="number" id="priceMN" step="1" value="0">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Stock</label>
+                    <input type="number" id="stock" value="10">
+                </div>
+                <div class="input-group">
+                    <label>URL de la Imagen</label>
+                    <input type="text" id="image" placeholder="img/foto.jpg o https://...">
+                </div>
+                <div class="input-group">
+                    <label>Descripción</label>
+                    <input type="text" id="descripcion" placeholder="Opcional">
+                </div>
+                <div class="input-group">
+                    <label>Garantía</label>
+                    <input type="text" id="garantia" placeholder="Ej: 30 días">
+                </div>
+                <div class="input-group">
+                    <label>Métodos de pago</label>
+                    <input type="text" id="pagos" placeholder="Ej: Zelle, Efectivo">
+                </div>
+                <div class="input-group">
+                    <label>Tipo de Entrega</label>
+                    <select id="tipoEntrega">
+                        <option value="Domicilio">Domicilio</option>
+                        <option value="Recogida">Recogida</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Link Google Maps (opcional)</label>
+                    <input type="text" id="mapa" placeholder="https://maps.google.com/...">
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <button type="submit" class="btn-primary" id="btn-guardar" style="flex:1;">Publicar Producto</button>
+                    <button type="button" id="btn-cancelar" onclick="cancelarEdicion()" 
+                        style="display:none; background:#6c757d; color:white; border:none; padding:12px 20px; border-radius:8px; cursor:pointer;">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <section class="calculator-card">
+            <h2>Mis Productos</h2>
+            <div id="mis-productos" class="product-grid"></div>
+        </section>
+    </main>
+
+    <script>
+        const token = localStorage.getItem('token');
+        const vendedor = JSON.parse(localStorage.getItem('vendedor') || 'null');
+
+        if (!token || !vendedor) {
+            window.location.href = 'login.html';
+        }
+
+        document.getElementById('titulo-vendedor').textContent = `Hola, ${vendedor.nombre}`;
+        document.getElementById('info-vendedor').textContent = 
+            `Zona: ${vendedor.zona} · Comisión: ${vendedor.comision}%` + 
+            (vendedor.esAdmin ? ' · Administrador' : '');
+
+        if (vendedor.esAdmin) {
+            document.getElementById('seccion-admin').style.display = 'block';
+            cargarVendedores();
+        }
+
+        async function cargarVendedores() {
+            try {
+                const res = await fetch('/api/vendedores', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const lista = await res.json();
+                const cont = document.getElementById('lista-vendedores');
+                cont.innerHTML = '';
+                lista.forEach(v => {
+                    cont.innerHTML += `
+                        <div class="vendedor-card">
+                            <h4>${v.nombre} ${v.usuario === 'admin' ? '(Admin)' : ''}</h4>
+                            <p>Usuario: <b>${v.usuario}</b> · Zona: ${v.zona} · Comisión: ${v.comision}%</p>
+                            <p>Tel: ${v.telefono || '—'} · ${v.activo ? '✅ Activo' : '❌ Inactivo'}</p>
+                        </div>`;
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        document.getElementById('form-vendedor')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const datos = {
+                nombre: document.getElementById('v-nombre').value,
+                telefono: document.getElementById('v-telefono').value,
+                zona: document.getElementById('v-zona').value,
+                usuario: document.getElementById('v-usuario').value,
+                password: document.getElementById('v-password').value,
+                comision: parseFloat(document.getElementById('v-comision').value) || 10
+            };
+            try {
+                const res = await fetch('/api/vendedores', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization
