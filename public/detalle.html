@@ -6,13 +6,76 @@
     <title>Detalles del Producto - Limonar Express</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        .detalle-container { max-width: 800px; margin: 20px auto; padding: 20px; background: var(--blanco); border-radius: 15px; }
-        .img-grande { width: 100%; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-height: 400px; object-fit: contain; background: #eee; }
-        .info-tecnica { background: var(--fondo); padding: 15px; border-radius: 10px; margin: 15px 0; border-left: 5px solid var(--verde); }
-        .acciones { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
-        .acciones button { flex: 1; min-width: 140px; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .detalle-container {
+            max-width: 720px;
+            margin: 20px auto;
+            padding: 20px;
+            background: var(--blanco);
+            border-radius: 16px;
+            box-shadow: var(--sombra);
+        }
+        .img-grande {
+            width: 100%;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            max-height: 380px;
+            object-fit: contain;
+            background: var(--fondo);
+        }
+        .precio-grande {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--verde);
+            margin: 8px 0 16px;
+        }
+        .info-tecnica {
+            background: var(--fondo);
+            padding: 16px;
+            border-radius: 12px;
+            margin: 16px 0;
+            border-left: 5px solid var(--verde);
+        }
+        .info-tecnica p {
+            margin: 8px 0;
+            font-size: 0.95rem;
+        }
+        .acciones {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 24px;
+        }
+        .acciones button {
+            flex: 1;
+            min-width: 150px;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+        .btn-carrito-detalle {
+            background: var(--verde);
+            color: white;
+        }
+        .btn-whatsapp {
+            background: #25D366;
+            color: white;
+        }
+        .stock-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .stock-ok { background: #e8f5ee; color: #1a7a4a; }
+        .stock-bajo { background: #fdf6e3; color: #8a6d0b; }
+        .stock-agotado { background: #fdecea; color: #c0392b; }
         body.dark-mode .detalle-container { background: #1e1e1e; }
-        body.dark-mode .info-tecnica { background: #2d2d2d; color: #eee; }
+        body.dark-mode .info-tecnica { background: #2d2d2d; }
     </style>
 </head>
 <body>
@@ -27,60 +90,105 @@
 
     <main class="detalle-container">
         <div id="contenido-detalle">
-            <p style="text-align:center;">Cargando detalles del producto...</p>
+            <p style="text-align:center; padding:40px;">Cargando detalles del producto...</p>
         </div>
     </main>
 
     <script src="script.js"></script>
     <script>
         window.onload = () => {
-            if (localStorage.getItem('tema') === 'oscuro') document.body.classList.add('dark-mode');
+            if (localStorage.getItem('tema') === 'oscuro') {
+                document.body.classList.add('dark-mode');
+            }
 
             const p = JSON.parse(localStorage.getItem('producto_seleccionado'));
+            
             if (!p) {
-                document.getElementById('contenido-detalle').innerHTML = "<h2>Producto no encontrado</h2>";
+                document.getElementById('contenido-detalle').innerHTML = `
+                    <h2 style="text-align:center;">Producto no encontrado</h2>
+                    <p style="text-align:center;"><a href="index.html">Volver a la tienda</a></p>
+                `;
                 return;
+            }
+
+            // Badge de stock
+            let stockBadge = '';
+            if (p.stock <= 0) {
+                stockBadge = '<span class="stock-badge stock-agotado">⚠ Agotado</span>';
+            } else if (p.stock < 3) {
+                stockBadge = `<span class="stock-badge stock-bajo">¡Últimos ${p.stock}!</span>`;
+            } else {
+                stockBadge = `<span class="stock-badge stock-ok">✅ ${p.stock} disponibles</span>`;
+            }
+
+            // Precios
+            let precios = '';
+            if (p.priceUSD > 0 && p.priceMN > 0) {
+                precios = `$${p.priceUSD} USD · ${Number(p.priceMN).toLocaleString()} MN`;
+            } else if (p.priceUSD > 0) {
+                precios = `$${p.priceUSD} USD`;
+            } else {
+                precios = `${Number(p.priceMN).toLocaleString()} MN`;
             }
 
             const container = document.getElementById('contenido-detalle');
             container.innerHTML = `
-                <img src="${p.image || ''}" class="img-grande" onerror="this.src='https://via.placeholder.com/600x400/e8f5ee/1a7a4a?text=Limonar+Express'">
-                <h1>${p.name}</h1>
-                <h2 style="color: var(--verde); margin: 8px 0;">
-                    ${p.priceUSD > 0 ? `$${p.priceUSD} USD` : ''}
-                    ${p.priceMN > 0 ? ` · ${p.priceMN.toLocaleString()} MN` : ''}
-                </h2>
+                <img src="${p.image || ''}" class="img-grande" 
+                     onerror="this.src='https://via.placeholder.com/600x400/e8f5ee/1a7a4a?text=Limonar+Express'">
                 
+                ${stockBadge}
+                <h1 style="margin:8px 0 4px; font-size:1.5rem;">${p.name}</h1>
+                <div class="precio-grande">${precios}</div>
+
                 <div class="info-tecnica">
                     <p><strong>📍 Zona:</strong> ${p.location || '—'}</p>
                     <p><strong>🚚 Entrega:</strong> ${p.tipoEntrega || '—'}</p>
-                    <p><strong>📦 Stock:</strong> ${p.stock > 0 ? p.stock + ' disponibles' : 'Agotado'}</p>
                     ${p.vendedor_nombre ? `<p><strong>👤 Vendedor:</strong> ${p.vendedor_nombre}</p>` : ''}
+                    ${p.category ? `<p><strong>🏷️ Categoría:</strong> ${p.category}</p>` : ''}
                     ${p.garantia ? `<p><strong>🛡️ Garantía:</strong> ${p.garantia}</p>` : ''}
                     ${p.pagos ? `<p><strong>💳 Pagos:</strong> ${p.pagos}</p>` : ''}
-                    ${p.mapa ? `<p><strong>🗺️ Ubicación:</strong> <a href="${p.mapa}" target="_blank" style="color:#007bff;">Ver en Google Maps</a></p>` : ''}
+                    ${p.mapa ? `<p><strong>🗺️ Ubicación:</strong> <a href="${p.mapa}" target="_blank" style="color:var(--azul);">Ver en Google Maps</a></p>` : ''}
                     ${p.descripcion ? `<p><strong>📝 Descripción:</strong> ${p.descripcion}</p>` : ''}
                 </div>
 
                 <div class="acciones">
-                    <button onclick="agregarAlCarritoDetalle()" style="background:var(--verde); color:white;">🛒 Añadir al carrito</button>
-                    <button onclick="preguntarWhatsApp('${p.name.replace(/'/g, "\\'")}')" style="background:#25D366; color:white;">💬 Consultar por WhatsApp</button>
+                    <button class="btn-carrito-detalle" onclick="agregarAlCarritoDetalle()">
+                        🛒 Añadir al carrito
+                    </button>
+                    <button class="btn-whatsapp" onclick="preguntarWhatsApp()">
+                        💬 Consultar por WhatsApp
+                    </button>
                 </div>
             `;
         };
 
         function agregarAlCarritoDetalle() {
             const p = JSON.parse(localStorage.getItem('producto_seleccionado'));
+            if (!p) return;
+
+            if (p.stock <= 0) {
+                alert('Este producto está agotado');
+                return;
+            }
+
             let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
             const itemExistente = carrito.find(item => item.id === p.id);
-            if (itemExistente) itemExistente.cantidad += 1;
-            else carrito.push({ ...p, cantidad: 1 });
+
+            if (itemExistente) {
+                itemExistente.cantidad += 1;
+            } else {
+                carrito.push({ ...p, cantidad: 1 });
+            }
+
             localStorage.setItem('carrito', JSON.stringify(carrito));
-            alert("¡Añadido al carrito!");
+            alert('¡Añadido al carrito!');
         }
 
-        function preguntarWhatsApp(nombre) {
-            const msj = `Hola! Me interesa el producto: *${nombre}*. ¿Está disponible y hacen envíos hoy?`;
+        function preguntarWhatsApp() {
+            const p = JSON.parse(localStorage.getItem('producto_seleccionado'));
+            if (!p) return;
+
+            const msj = `Hola! Me interesa el producto: *${p.name}*. ¿Está disponible y hacen envíos hoy?`;
             window.open(`https://wa.me/5358956989?text=${encodeURIComponent(msj)}`, '_blank');
         }
     </script>
