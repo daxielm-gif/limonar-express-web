@@ -6,7 +6,6 @@ const fs = require('fs');
 const crypto = require('crypto');
 
 const app = express();
-const PORT = 3000;
 
 const dbPath = path.join(__dirname, 'data', 'tienda.db');
 fs.mkdirSync(path.dirname(dbPath), { recursive: true });
