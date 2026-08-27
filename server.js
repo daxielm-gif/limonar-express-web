@@ -107,6 +107,39 @@ app.post('/api/login', (req, res) => {
     }
   });
 });
+// ========== REGISTRO PÚBLICO DE VENDEDORES ==========
+app.post('/api/registro', (req, res) => {
+  const { nombre, telefono, zona, usuario, password } = req.body;
+
+  if (!nombre || !usuario || !password) {
+    return res.status(400).json({ error: 'Nombre, usuario y contraseña son obligatorios' });
+  }
+
+  if (password.length < 6) {
+    return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
+  }
+
+  try {
+    const result = db.prepare(`
+      INSERT INTO vendedores (nombre, telefono, zona, usuario, password, comision)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(
+      nombre,
+      telefono || '',
+      zona || 'Limonar',
+      usuario.toLowerCase().trim(),
+      hashPassword(password),
+      0   // Comisión 0% al inicio (gratis)
+    );
+
+    res.json({ 
+      mensaje: 'Cuenta creada correctamente. Ya puedes iniciar sesión.',
+      id: result.lastInsertRowid 
+    });
+  } catch (err) {
+    res.status(400).json({ error: 'Ese usuario ya existe. Prueba con otro.' });
+  }
+});
 
 app.post('/api/logout', (req, res) => {
   const token = req.headers['authorization']?.replace('Bearer ', '');
