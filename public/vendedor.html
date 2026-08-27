@@ -29,6 +29,7 @@
             cursor: pointer;
             font-size: 0.85rem;
         }
+        .btn-logout:hover { background: rgba(255,255,255,0.3); }
         .admin-section {
             border: 2px solid var(--dorado);
             background: var(--dorado-claro);
@@ -102,7 +103,8 @@
             <button class="btn-logout" onclick="cerrarSesion()">Cerrar sesión</button>
         </div>
 
-        <div class="stats-box" id="stats-box">
+        <!-- Estadísticas -->
+        <div class="stats-box">
             <div class="stat-card">
                 <div class="number" id="stat-total">0</div>
                 <div class="label">Productos</div>
@@ -146,7 +148,7 @@
                 </div>
                 <div class="input-group">
                     <label>Comisión (%)</label>
-                    <input type="number" id="v-comision" value="10" min="0" max="50" step="0.5">
+                    <input type="number" id="v-comision" value="0" min="0" max="50" step="0.5">
                 </div>
                 <button type="submit" class="btn-primary">Crear Vendedor</button>
             </form>
@@ -194,7 +196,7 @@
                 </div>
                 <div class="input-group">
                     <label>URL de la Imagen</label>
-                    <input type="text" id="image" placeholder="img/foto.jpg o https://...">
+                    <input type="text" id="image" placeholder="https://... o img/foto.jpg">
                 </div>
                 <div class="input-group">
                     <label>Descripción</label>
@@ -206,7 +208,7 @@
                 </div>
                 <div class="input-group">
                     <label>Métodos de pago</label>
-                    <input type="text" id="pagos" placeholder="Ej: Zelle, Efectivo">
+                    <input type="text" id="pagos" placeholder="Ej: Zelle, Efectivo, Transferencia">
                 </div>
                 <div class="input-group">
                     <label>Tipo de Entrega</label>
@@ -229,6 +231,7 @@
             </form>
         </section>
 
+        <!-- Lista de mis productos -->
         <section class="calculator-card">
             <h2>Mis Productos</h2>
             <div id="mis-productos" class="product-grid"></div>
@@ -253,6 +256,23 @@
             cargarVendedores();
         }
 
+        // ========== CERRAR SESIÓN (ARREGLADO) ==========
+        async function cerrarSesion() {
+            try {
+                if (token) {
+                    await fetch('/api/logout', {
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                }
+            } catch (e) {}
+            
+            localStorage.removeItem('token');
+            localStorage.removeItem('vendedor');
+            window.location.href = 'login.html';
+        }
+
+        // ========== VENDEDORES (admin) ==========
         async function cargarVendedores() {
             try {
                 const res = await fetch('/api/vendedores', {
@@ -280,9 +300,184 @@
                 zona: document.getElementById('v-zona').value,
                 usuario: document.getElementById('v-usuario').value,
                 password: document.getElementById('v-password').value,
-                comision: parseFloat(document.getElementById('v-comision').value) || 10
+                comision: parseFloat(document.getElementById('v-comision').value) || 0
             };
             try {
                 const res = await fetch('/api/vendedores', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(datos)
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alert('Vendedor creado correctamente');
+                    document.getElementById('form-vendedor').reset();
+                    document.getElementById('v-comision').value = 0;
+                    cargarVendedores();
+                } else {
+                    alert(data.error || 'Error al crear vendedor');
+                }
+            } catch (err) {
+                alert('Error de conexión');
+            }
+        });
+
+        // ========== PRODUCTOS ==========
+        let productosActuales = [];
+
+        async function cargarMisProductos() {
+            try {
+                const res = await fetch('/api/mis-productos', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (res.status === 401) {
+                    cerrarSesion();
+                    return;
+                }
+                productosActuales = await res.json();
+                mostrarProductos(productosActuales);
+                actualizarStats(productosActuales);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function actualizarStats(productos) {
+            document.getElementById('stat-total').textContent = productos.length;
+            document.getElementById('stat-stock').textContent = productos.filter(p => p.stock > 0).length;
+            document.getElementById('stat-agotados').textContent = productos.filter(p => p.stock <= 0).length;
+        }
+
+        function mostrarProductos(productos) {
+            const cont = document.getElementById('mis-productos');
+            cont.innerHTML = '';
+            if (productos.length === 0) {
+                cont.innerHTML = '<p style="text-align:center; color:#888; grid-column:1/-1;">Todavía no tienes productos publicados</p>';
+                return;
+            }
+            productos.forEach(p => {
+                cont.innerHTML += `
+                    <div class="product-card" style="padding:12px;">
+                        <h4 style="margin-bottom:6px;">${p.name}</h4>
+                        <p style="font-size:0.85rem; color:#666;">$${p.priceUSD} USD · Stock: ${p.stock}</p>
+                        <p style="font-size:0.8rem; color:#888;">${p.location} · ${p.category}</p>
+                        <div style="margin-top:10px;">
+                            <button class="btn-edit" onclick="editarProducto('${p.id}')">Editar</button>
+                            <button class="btn-delete" onclick="borrarProducto('${p.id}')">Eliminar</button>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function editarProducto(id) {
+            const p = productosActuales.find(prod => prod.id === id);
+            if (!p) return;
+
+            document.getElementById('edit-id').value = p.id;
+            document.getElementById('name').value = p.name || '';
+            document.getElementById('category').value = p.category || 'Otros';
+            document.getElementById('location').value = p.location || 'Limonar';
+            document.getElementById('priceUSD').value = p.priceUSD || 0;
+            document.getElementById('priceMN').value = p.priceMN || 0;
+            document.getElementById('stock').value = p.stock || 0;
+            document.getElementById('image').value = p.image || '';
+            document.getElementById('descripcion').value = p.descripcion || '';
+            document.getElementById('garantia').value = p.garantia || '';
+            document.getElementById('pagos').value = p.pagos || '';
+            document.getElementById('tipoEntrega').value = p.tipoEntrega || 'Domicilio';
+            document.getElementById('mapa').value = p.mapa || '';
+
+            document.getElementById('form-titulo').textContent = 'Editar Producto';
+            document.getElementById('btn-guardar').textContent = 'Guardar Cambios';
+            document.getElementById('btn-cancelar').style.display = 'inline-block';
+            document.getElementById('product-form').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function cancelarEdicion() {
+            document.getElementById('product-form').reset();
+            document.getElementById('edit-id').value = '';
+            document.getElementById('form-titulo').textContent = 'Añadir Nuevo Producto';
+            document.getElementById('btn-guardar').textContent = 'Publicar Producto';
+            document.getElementById('btn-cancelar').style.display = 'none';
+            document.getElementById('stock').value = 10;
+        }
+
+        document.getElementById('product-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-id').value;
+            const producto = {
+                name: document.getElementById('name').value,
+                category: document.getElementById('category').value,
+                location: document.getElementById('location').value,
+                priceUSD: parseFloat(document.getElementById('priceUSD').value) || 0,
+                priceMN: parseFloat(document.getElementById('priceMN').value) || 0,
+                stock: parseInt(document.getElementById('stock').value) || 0,
+                image: document.getElementById('image').value || '',
+                descripcion: document.getElementById('descripcion').value || '',
+                garantia: document.getElementById('garantia').value || '',
+                pagos: document.getElementById('pagos').value || '',
+                tipoEntrega: document.getElementById('tipoEntrega').value,
+                mapa: document.getElementById('mapa').value || ''
+            };
+
+            try {
+                let res;
+                if (id) {
+                    res = await fetch(`/api/productos/${id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + token
+                        },
+                        body: JSON.stringify(producto)
+                    });
+                } else {
+                    res = await fetch('/api/productos', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + token
+                        },
+                        body: JSON.stringify(producto)
+                    });
+                }
+
+                const data = await res.json();
+                if (res.ok) {
+                    alert(id ? 'Producto actualizado' : '¡Producto publicado!');
+                    cancelarEdicion();
+                    cargarMisProductos();
+                } else {
+                    alert(data.error || 'Error al guardar');
+                }
+            } catch (err) {
+                alert('Error de conexión');
+            }
+        });
+
+        async function borrarProducto(id) {
+            if (!confirm('¿Eliminar este producto?')) return;
+            try {
+                const res = await fetch(`/api/productos/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (res.ok) {
+                    cargarMisProductos();
+                } else {
+                    const data = await res.json();
+                    alert(data.error || 'No se pudo eliminar');
+                }
+            } catch (e) {
+                alert('Error de conexión');
+            }
+        }
+
+        // Iniciar
+        cargarMisProductos();
+    </script>
+</body>
+</html>
