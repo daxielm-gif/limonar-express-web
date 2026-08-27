@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Vendedor | Limonar Express</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .login-box {
+            max-width: 420px;
+            margin: 40px auto;
+            background: var(--blanco);
+            border: 1px solid var(--borde);
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: var(--sombra);
+        }
+        .login-box h1 {
+            font-family: var(--fuente-display);
+            font-size: 1.4rem;
+            text-align: center;
+            margin-bottom: 6px;
+            color: var(--verde);
+        }
+        .login-box p {
+            text-align: center;
+            color: var(--texto-suave);
+            font-size: 0.88rem;
+            margin-bottom: 20px;
+        }
+        .error-msg, .success-msg {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+            display: none;
+        }
+        .error-msg { background: #fdecea; color: #c0392b; }
+        .success-msg { background: #e8f5ee; color: #1a7a4a; }
+        .gratis-badge {
+            background: var(--dorado-claro);
+            color: #8a6d0b;
+            text-align: center;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            margin-bottom: 18px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-inner">
+            <a href="index.html" class="logo">Limonar<span>Express</span></a>
+        </div>
+    </header>
+
+    <div class="login-box">
+        <h1>Únete como Vendedor</h1>
+        <p>Publica tus productos y llega a más clientes en Limonar</p>
+
+        <div class="gratis-badge">🎉 Ahora mismo es 100% GRATIS</div>
+
+        <div id="error" class="error-msg"></div>
+        <div id="success" class="success-msg"></div>
+
+        <form id="registro-form">
+            <div class="input-group">
+                <label>Nombre completo</label>
+                <input type="text" id="nombre" required placeholder="Ej: Juan Pérez">
+            </div>
+            <div class="input-group">
+                <label>Teléfono (WhatsApp)</label>
+                <input type="text" id="telefono" placeholder="5358xxxxxx">
+            </div>
+            <div class="input-group">
+                <label>Zona</label>
+                <select id="zona">
+                    <option value="Limonar">Limonar</option>
+                    <option value="Matanzas">Matanzas</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Usuario (para entrar)</label>
+                <input type="text" id="usuario" required placeholder="Ej: juanperez">
+            </div>
+            <div class="input-group">
+                <label>Contraseña</label>
+                <input type="password" id="password" required placeholder="Mínimo 6 caracteres" minlength="6">
+            </div>
+            <button type="submit" class="btn-primary">Crear mi cuenta</button>
+        </form>
+
+        <p style="text-align:center; margin-top:18px; font-size:0.85rem;">
+            ¿Ya tienes cuenta? <a href="login.html" style="color:var(--verde); font-weight:600;">Iniciar sesión</a>
+        </p>
+    </div>
+
+    <script>
+        document.getElementById('registro-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const errorDiv = document.getElementById('error');
+            const successDiv = document.getElementById('success');
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+
+            const datos = {
+                nombre: document.getElementById('nombre').value.trim(),
+                telefono: document.getElementById('telefono').value.trim(),
+                zona: document.getElementById('zona').value,
+                usuario: document.getElementById('usuario').value.trim(),
+                password: document.getElementById('password').value
+            };
+
+            try {
+                const res = await fetch('/api/registro', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datos)
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    errorDiv.textContent = data.error || 'Error al registrarse';
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+
+                successDiv.textContent = data.mensaje + ' Redirigiendo al login...';
+                successDiv.style.display = 'block';
+
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+
+            } catch (err) {
+                errorDiv.textContent = 'Error de conexión. Intenta de nuevo.';
+                errorDiv.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
